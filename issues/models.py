@@ -27,6 +27,25 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+#问题发图功能
+class IssueImage(models.Model):
+    issue = models.ForeignKey(
+        Issue,
+        related_name='images',
+        on_delete=models.CASCADE
+    )
+    image = models.ImageField(
+        upload_to='issue/nodes/',
+        null=True,
+        blank=True
+    )
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+
 #节点追踪，教职工可以更新问题解决节点
 class IssueProgress(models.Model):
     issue = models.ForeignKey(

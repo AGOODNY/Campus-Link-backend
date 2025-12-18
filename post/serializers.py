@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import Post,Comment
+from .models import Post,Comment,PostImage
+
+
+#图片序列化器
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ['id', 'image', 'order']
 
 
 class LifePostListSerializer(serializers.ModelSerializer):
@@ -7,6 +14,7 @@ class LifePostListSerializer(serializers.ModelSerializer):
         source='author.username',
         read_only=True
     )
+    images = PostImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
@@ -17,15 +25,16 @@ class LifePostListSerializer(serializers.ModelSerializer):
             'like_count',
             'view_count',
             'created_at',
-            'image'
+            'images'
         ]
 
-
+#详情页
 class LifePostDetailSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(
         source='author.username',
         read_only=True
     )
+    images = PostImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
@@ -34,11 +43,12 @@ class LifePostDetailSerializer(serializers.ModelSerializer):
             'title',
             'content',
             'author_name',
-            'image',
+            'images',
             'like_count',
             'view_count',
             'created_at'
         ]
+
 #返回评论数量
 comment_count = serializers.IntegerField(
     source='comments.count',
@@ -69,3 +79,5 @@ class CommentSerializer(serializers.ModelSerializer):
             'content',
             'created_at'
         ]
+
+

@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import Issue,IssueNode
+from issues.models import IssueNode, Issue, IssueImage
+
+#发多图
+class IssueImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IssueImage
+        fields = ['id', 'image', 'order']
+
 
 #节点序列化器
 class IssueNodeSerializer(serializers.ModelSerializer):
@@ -25,6 +32,7 @@ class IssueNodeSerializer(serializers.ModelSerializer):
 #问题追踪详情序列化器(按照时间先后排序)
 class IssueDetailSerializer(serializers.ModelSerializer):
     nodes = serializers.SerializerMethodField()
+    images = IssueImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Issue
@@ -33,12 +41,10 @@ class IssueDetailSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'status',
+            'images',
             'nodes'
         ]
 
-    def get_nodes(self, obj):
-        nodes = obj.nodes.order_by('created_at')
-        return IssueNodeSerializer(nodes, many=True).data
 
 
 #Issue列表序列化器

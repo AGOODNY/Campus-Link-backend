@@ -21,13 +21,6 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
 
-    # 图片（多图用 JSON 或独立表，这里先简单写一下）
-    image = models.ImageField(
-        upload_to='post/',
-        null=True,
-        blank=True
-    )
-
     # 决定发到哪个区
     target = models.CharField(
         max_length=10,
@@ -50,6 +43,22 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+#图片模型
+class PostImage(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    image = models.ImageField(upload_to='post/images/')
+    order = models.IntegerField(default=0)  # 第几张图（可选）
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Image of post {self.post.id}'
 
 #点赞模型
 class PostLike(models.Model):

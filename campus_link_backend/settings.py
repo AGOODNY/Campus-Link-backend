@@ -1,6 +1,10 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SECRET_KEY = 'django-insecure-)okjtv$5umrzw!70_sl9%o#7x1fehhg88f#654k#(+8&&8311l'
 
