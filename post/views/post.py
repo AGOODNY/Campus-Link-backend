@@ -15,7 +15,6 @@ class PostListView(APIView):
 
         qs = Post.objects.filter(target=target)
 
-        # 只有 life支持分类
         if target == 'life' and category:
             qs = qs.filter(life_category=category)
 
@@ -24,9 +23,17 @@ class PostListView(APIView):
         else:
             qs = qs.order_by('-created_at')
 
-        serializer = LifePostListSerializer(qs, many=True)
-        return Response(serializer.data)
+        # ⭐ 关键修改：传入 request 到 serializer
+        serializer = LifePostListSerializer(qs, many=True, context={'request': request})
 
+        return Response({
+            'code': 200,
+            'message': 'ok',
+            'data': {
+                'list': serializer.data,
+                'hasMore': False
+            }
+        })
 
 class PostDetailView(APIView):
     def get(self, request, post_id):
@@ -67,7 +74,14 @@ class LifePostSearchView(APIView):
         ).order_by('-created_at')
 
         serializer = LifePostListSerializer(qs, many=True)
-        return Response(serializer.data)
+        return Response({
+            'code': 200,
+            'message': 'ok',
+            'data': {
+                'list': serializer.data,
+                'hasMore': False
+            }
+        })
 
 #学习区搜索
 class StudyPostSearchView(APIView):

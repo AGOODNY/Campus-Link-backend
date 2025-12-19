@@ -1,40 +1,25 @@
 from rest_framework import serializers
-from .models import Post,Comment,PostImage
-
-
-#图片序列化器
-class PostImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PostImage
-        fields = ['id', 'image', 'order']
-
+from .models import Post, Comment, PostImage
 
 class LifePostListSerializer(serializers.ModelSerializer):
-    author_name = serializers.CharField(
+    user_name = serializers.CharField(
         source='author.username',
         read_only=True
     )
-    images = PostImageSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = Post
-        fields = [
-            'id',
-            'title',
-            'author_name',
-            'like_count',
-            'view_count',
-            'created_at',
-            'images'
-        ]
+    avatar = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
 
-#详情页
-class LifePostDetailSerializer(serializers.ModelSerializer):
-    author_name = serializers.CharField(
-        source='author.username',
+    create_time = serializers.DateTimeField(
+        source='created_at',
         read_only=True
     )
-    images = PostImageSerializer(many=True, read_only=True)
+
+    category = serializers.CharField(
+        source='life_category',
+        read_only=True
+    )
 
     class Meta:
         model = Post
@@ -42,29 +27,56 @@ class LifePostDetailSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'content',
-            'author_name',
             'images',
+            'user_name',
+            'avatar',
             'like_count',
-            'view_count',
-            'created_at'
+            'comment_count',
+            'create_time',
+            'category',
         ]
 
-#返回评论数量
-comment_count = serializers.IntegerField(
-    source='comments.count',
-    read_only=True
-)
+    def get_images(self, obj):
+        """
+        返回完整 URL 数组
+        """
+        request = self.context.get('request')  # 获取 request
+        result = []
+        for img in obj.images.all():
+            if img.image:
+                try:
+                    url = img.image.url
+                    if request:
+                        url = request.build_absolute_uri(url)
+                    result.append(url)
+                except Exception:
+                    continue
+        return result
 
-#辅助前端判断点赞按钮是否高亮，可否点击
-is_liked = serializers.SerializerMethodField()
+    def get_comment_count(self, obj):
+        return obj.comments.count()
 
-def get_is_liked(self, obj):
-    user = self.context['request'].user
-    if not user.is_authenticated:
-        return False
-    return obj.likes.filter(user=user).exists()
+    def get_avatar(self, obj):
+        """
+        返回完整 URL
+        """
+        avatar = getattr(obj.author, 'avatar', None)
+        if avatar:
+            try:
+                url = avatar.url
+                request = self.context.get('request')
+                if request:
+                    url = request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return None
+        return None
 
-#评论序列化器
+
+class LifePostDetailSerializer(LifePostListSerializer):
+    pass
+
+
 class CommentSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(
         source='author.username',
@@ -79,5 +91,3 @@ class CommentSerializer(serializers.ModelSerializer):
             'content',
             'created_at'
         ]
-
-
