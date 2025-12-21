@@ -35,9 +35,9 @@ class UnifiedPostSerializer(serializers.Serializer):
                 )
 
         if target == 'issue':
-            if not data.get('title') or not data.get('description') or not data.get('location'):
+            if not data.get('title') or not data.get('description') :
                 raise serializers.ValidationError(
-                    'title, description and location are required for issue'
+                    'title, description are required for issue'
                 )
 
         return data

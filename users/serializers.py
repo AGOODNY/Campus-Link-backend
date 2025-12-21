@@ -14,6 +14,5 @@ class MeSerializer(serializers.ModelSerializer):
             'id',
             'avatar',
             'nickname',
-            'signature',
             'username',
         ]

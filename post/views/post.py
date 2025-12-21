@@ -23,7 +23,6 @@ class PostListView(APIView):
         else:
             qs = qs.order_by('-created_at')
 
-        # ⭐ 关键修改：传入 request 到 serializer
         serializer = LifePostListSerializer(qs, many=True, context={'request': request})
 
         return Response({

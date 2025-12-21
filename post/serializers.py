@@ -3,7 +3,7 @@ from .models import Post, Comment, PostImage
 
 class LifePostListSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(
-        source='author.username',
+        source='author.nickname',
         read_only=True
     )
 
@@ -57,9 +57,6 @@ class LifePostListSerializer(serializers.ModelSerializer):
         return obj.comments.count()
 
     def get_avatar(self, obj):
-        """
-        返回完整 URL
-        """
         avatar = getattr(obj.author, 'avatar', None)
         if avatar:
             try:
@@ -79,7 +76,7 @@ class LifePostDetailSerializer(LifePostListSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(
-        source='author.username',
+        source='author.nickname',
         read_only=True
     )
 

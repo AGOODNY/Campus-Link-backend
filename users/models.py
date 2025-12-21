@@ -23,10 +23,6 @@ class User(AbstractUser):
         max_length=50,
         blank=True
     )
-    signature = models.CharField(
-        max_length=200,
-        blank=True
-    )
 
     def save(self, *args, **kwargs):
         # 自动同步 Django 的 is_staff

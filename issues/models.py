@@ -16,7 +16,6 @@ class Issue(models.Model):
 
     title = models.CharField(max_length=200)
     description = models.TextField()
-    location = models.CharField(max_length=200)
 
     status = models.CharField(
         max_length=20,

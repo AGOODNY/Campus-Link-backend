@@ -7,7 +7,7 @@ from users.serializers import MeSerializer
 from post.models import Post,PostViewHistory
 from post.serializers import LifePostListSerializer
 
-#上传头像、修改昵称、修改个签
+#上传头像、修改昵称
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 

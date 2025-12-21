@@ -51,8 +51,7 @@ class UnifiedPostView(APIView):
             issue = Issue.objects.create(
                 creator=user,
                 title=data['title'],
-                description=data['description'],
-                location=data['location']
+                description=data['description']
             )
 
             # 多图上传
