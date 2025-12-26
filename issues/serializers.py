@@ -28,8 +28,8 @@ class IssueNodeSerializer(serializers.ModelSerializer):
         return data
 
 class IssueDetailSerializer(serializers.ModelSerializer):
-    creator_name = serializers.CharField(source="creator.username", read_only=True)
-    creator_avatar = serializers.SerializerMethodField()
+    nickname = serializers.CharField(source="creator.nickname", read_only=True)
+    avatar = serializers.SerializerMethodField()
     issue_pic = IssueImageSerializer(many=True, read_only=True)
     nodes = IssueNodeSerializer(many=True, read_only=True)
 
@@ -38,23 +38,43 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id","title","description","status",
             "created_at","updated_at",
-            "creator_name","creator_avatar",
+            "nickname","avatar",
             "issue_pic","nodes",
         ]
 
-    def get_creator_avatar(self, obj):
+    def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = getattr(obj.creator, "avatar", None)
-        if not avatar:
-            return None
-        try:
-            return request.build_absolute_uri(avatar.url)
-        except:
-            return None
+        if avatar:
+            try:
+                return request.build_absolute_uri(avatar.url)
+            except:
+                return None
+        return None
+
 
 class IssueListSerializer(serializers.ModelSerializer):
-    creator_name = serializers.CharField(source='creator.username', read_only=True)
+    nickname = serializers.CharField(source='creator.nickname', read_only=True)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = Issue
-        fields = ['id','title','status','creator_name','created_at']
+        fields = [
+            'id',
+            'title',
+            'status',
+            'nickname',
+            'avatar',
+            'created_at'
+        ]
+
+    def get_avatar(self, obj):
+        request = self.context.get("request")
+        avatar = getattr(obj.creator, "avatar", None)
+        if avatar:
+            try:
+                return request.build_absolute_uri(avatar.url)
+            except:
+                return None
+        return None
+

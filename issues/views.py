@@ -39,16 +39,18 @@ class IssueNodeCreateView(APIView):
 
 class IssueListView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         issues = Issue.objects.all().order_by('-created_at')
-        serializer = IssueListSerializer(issues, many=True)
+        serializer = IssueListSerializer(issues, many=True, context={"request": request})
         return Response(serializer.data)
 
 class MyIssuesView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         my_issues = Issue.objects.filter(creator=request.user).order_by('-created_at')
-        serializer = IssueListSerializer(my_issues, many=True)
+        serializer = IssueListSerializer(my_issues, many=True, context={"request": request})
         return Response(serializer.data)
 
 class IssueDetailView(APIView):
@@ -58,5 +60,5 @@ class IssueDetailView(APIView):
             issue = Issue.objects.get(id=issue_id)
         except Issue.DoesNotExist:
             return Response({"detail":"Issue not found"}, status=404)
-        serializer = IssueDetailSerializer(issue, context={"request": request})   # FIX HERE
+        serializer = IssueDetailSerializer(issue, context={"request": request})
         return Response(serializer.data, status=200)
