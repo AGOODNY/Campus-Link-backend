@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('node_status', models.CharField(max_length=50)),
                 ('description', models.TextField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('issue', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='nodes', to='issues.issue')),
+                ('issue', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='issue_pic', to='issues.issue')),
                 ('operator', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
         ),

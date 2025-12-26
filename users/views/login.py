@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from users.serializers import UserSerializer
+from users.serializers import MeSerializer
 
 
 class LoginView(APIView):

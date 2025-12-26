@@ -88,3 +88,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'content',
             'created_at'
         ]
+
+
+class PostViewHistorySerializer:
+    pass
