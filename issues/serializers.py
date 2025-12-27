@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from issues.models import IssueNode, Issue, IssueImage
 
+DEFAULT_NICKNAME = "A_Guest"
+DEFAULT_AVATAR_URL = "/media/default/default_avatar.jpg"
+
+
 class IssueImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = IssueImage
@@ -13,8 +17,9 @@ class IssueImageSerializer(serializers.ModelSerializer):
             data["image"] = request.build_absolute_uri(instance.image.url)
         return data
 
+
 class IssueNodeSerializer(serializers.ModelSerializer):
-    operator_name = serializers.CharField(source='operator.username', read_only=True)
+    operator_name = serializers.CharField(source='operator.nickname', read_only=True)
 
     class Meta:
         model = IssueNode
@@ -27,8 +32,9 @@ class IssueNodeSerializer(serializers.ModelSerializer):
             data["image"] = request.build_absolute_uri(instance.image.url)
         return data
 
+
 class IssueDetailSerializer(serializers.ModelSerializer):
-    nickname = serializers.CharField(source="creator.nickname", read_only=True)
+    nickname = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     issue_pic = IssueImageSerializer(many=True, read_only=True)
     nodes = IssueNodeSerializer(many=True, read_only=True)
@@ -42,20 +48,32 @@ class IssueDetailSerializer(serializers.ModelSerializer):
             "issue_pic","nodes",
         ]
 
+    def get_nickname(self, obj):
+        nickname = getattr(obj.creator, "nickname", None)
+        if not nickname or nickname.strip() == "":
+            return DEFAULT_NICKNAME
+        return nickname
+
     def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = getattr(obj.creator, "avatar", None)
+
         if avatar:
             try:
                 return request.build_absolute_uri(avatar.url)
             except:
-                return None
-        return None
+                pass
+
+        # 默认头像返回完整 URL（继续支持构造外链）
+        if request:
+            return request.build_absolute_uri(DEFAULT_AVATAR_URL)
+        return DEFAULT_AVATAR_URL
 
 
 class IssueListSerializer(serializers.ModelSerializer):
-    nickname = serializers.CharField(source='creator.nickname', read_only=True)
+    nickname = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
+    creator_id = serializers.IntegerField(source="creator.id", read_only=True)
 
     class Meta:
         model = Issue
@@ -65,16 +83,26 @@ class IssueListSerializer(serializers.ModelSerializer):
             'status',
             'nickname',
             'avatar',
+            'creator_id',
             'created_at'
         ]
+
+    def get_nickname(self, obj):
+        nickname = getattr(obj.creator, "nickname", None)
+        if not nickname or nickname.strip() == "":
+            return DEFAULT_NICKNAME
+        return nickname
 
     def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = getattr(obj.creator, "avatar", None)
+
         if avatar:
             try:
                 return request.build_absolute_uri(avatar.url)
             except:
-                return None
-        return None
+                pass
 
+        if request:
+            return request.build_absolute_uri(DEFAULT_AVATAR_URL)
+        return DEFAULT_AVATAR_URL
