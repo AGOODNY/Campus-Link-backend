@@ -1,14 +1,15 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from common.serializers import UnifiedPostSerializer
-from issues.models import Issue,IssueImage
+from issues.models import Issue, IssueImage
 from post.models import Post, PostImage
-
 
 class UnifiedPostView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
         serializer = UnifiedPostSerializer(data=request.data)
@@ -18,7 +19,7 @@ class UnifiedPostView(APIView):
         user = request.user
         target = data['target']
 
-        # 发到生活区 / 学习区
+        # 生活区 / 学习区
         if target in ['study', 'life']:
             post = Post.objects.create(
                 author=user,
@@ -28,46 +29,23 @@ class UnifiedPostView(APIView):
                 life_category=data.get('life_category')
             )
 
-            # 多图上传
-            images = request.FILES.getlist('images')
-            for index, image in enumerate(images):
-                PostImage.objects.create(
-                    post=post,
-                    image=image,
-                    order=index
-                )
+            image = request.FILES.get("image")
+            if image:
+                PostImage.objects.create(post=post, image=image)
 
-            return Response({
-                'code': 0,
-                'message': 'post created',
-                'data': {
-                    'id': post.id,
-                    'target': target
-                }
-            })
+            return Response({"detail": "created", "id": post.id}, status=201)
 
-        # 发到问题追踪
+        # 问题追踪区（Issue）
         if target == 'issue':
             issue = Issue.objects.create(
                 creator=user,
                 title=data['title'],
-                description=data['description']
+                description=data['description'],
+                status="pending"
             )
 
-            # 多图上传
-            images = request.FILES.getlist('images')
-            for index, image in enumerate(images):
-                IssueImage.objects.create(
-                    issue=issue,
-                    image=image,
-                    order=index
-                )
+            image = request.FILES.get("image")
+            if image:
+                IssueImage.objects.create(issue=issue, image=image, order=0)
 
-            return Response({
-                'code': 0,
-                'message': 'issue created',
-                'data': {
-                    'id': issue.id,
-                    'target': 'issue'
-                }
-            })
+            return Response({"detail": "created", "id": issue.id}, status=201)

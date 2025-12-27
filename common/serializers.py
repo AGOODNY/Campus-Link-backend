@@ -20,6 +20,9 @@ class UnifiedPostSerializer(serializers.Serializer):
     description = serializers.CharField(required=False)
     location = serializers.CharField(required=False)
 
+    # 单图上传
+    image = serializers.ImageField(required=False)
+
     def validate(self, data):
         target = data.get('target')
 
@@ -28,14 +31,13 @@ class UnifiedPostSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     'title and content are required for study/life post'
                 )
-
             if target == 'life' and not data.get('life_category'):
                 raise serializers.ValidationError(
                     'life_category is required for life post'
                 )
 
         if target == 'issue':
-            if not data.get('title') or not data.get('description') :
+            if not data.get('title') or not data.get('description'):
                 raise serializers.ValidationError(
                     'title, description are required for issue'
                 )
