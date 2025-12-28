@@ -8,35 +8,44 @@ from .serializers import IssueNodeSerializer, IssueListSerializer, IssueDetailSe
 
 class IssueNodeCreateView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, issue_id):
         user = request.user
         if not user.is_staff:
-            return Response({"detail": "Only staff can update issue issue_pic"}, status=403)
+            return Response({"detail": "Permission denied"}, status=403)
 
         try:
             issue = Issue.objects.get(id=issue_id)
         except Issue.DoesNotExist:
-            return Response({"detail": "Issue not found"}, status=404)
+            return Response({"detail": "Not found"}, status=404)
 
-        if issue.status == 'solved':
-            return Response({"detail": "Issue is already completed"}, status=400)
+        node_title = request.data.get("node_title", "").strip()
+        description = request.data.get("description", "").strip()
+        image = request.FILES.get("image")
 
-        serializer = IssueNodeSerializer(data=request.data)
-        if serializer.is_valid():
-            node_status = serializer.validated_data['node_status']
-            IssueNode.objects.create(
-                issue=issue,
-                node_title=serializer.validated_data['node_title'],
-                node_status=node_status,
-                description=serializer.validated_data['description'],
-                image=serializer.validated_data.get('image'),
-                operator=user
-            )
-            issue.status = "solved" if node_status == "已完成" else "processing"
-            issue.save()
-            return Response({"detail": "Node added"}, status=201)
-        return Response(serializer.errors, status=400)
+        # 节点状态逻辑: pending -> accepted -> resolved
+        if issue.status == "pending":
+            new_status = "accepted"
+        elif issue.status == "accepted":
+            new_status = "resolved"
+        else:
+            return Response({"detail": "Already resolved"}, status=400)
+
+        node = IssueNode.objects.create(
+            issue=issue,
+            node_title=node_title,
+            node_status=new_status,
+            description=description,
+            image=image,
+            operator=user
+        )
+
+        issue.status = new_status
+        issue.save(update_fields=["status"])
+
+        serializer = IssueDetailSerializer(issue, context={"request": request})
+        return Response(serializer.data, status=201)
 
 class IssueListView(APIView):
     permission_classes = [IsAuthenticated]
