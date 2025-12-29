@@ -2,8 +2,7 @@ from django.urls import path
 from users.views.login import LoginView
 from users.views.me import (
     MeView,
-    MyPostListView,
-    MyViewHistoryView,
+    MyViewHistoryView, MyPostListView
 )
 from post.views.view_history import PostViewRecordView, ViewHistoryListView
 

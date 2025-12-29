@@ -22,7 +22,7 @@ class UnifiedPostView(APIView):
         # 生活区 / 学习区
         if target in ['study', 'life']:
             post = Post.objects.create(
-                author=user,
+                author=request.user,
                 title=data['title'],
                 content=data['content'],
                 target=target,

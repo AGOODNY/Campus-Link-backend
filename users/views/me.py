@@ -40,8 +40,7 @@ class MeView(APIView):
         serializer.save()
         return Response(serializer.data)
 
-
-#我发过的帖子（不区分生活区学习区，前端需要做区分）
+#我发过的帖子（不区分生活区学习区）
 class MyPostListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -51,8 +50,9 @@ class MyPostListView(APIView):
             target__in=['life', 'study']
         ).order_by('-created_at')
 
-        serializer = LifePostListSerializer(qs, many=True)
+        serializer = LifePostListSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
+
 
 #浏览记录
 class MyViewHistoryView(APIView):

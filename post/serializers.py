@@ -37,21 +37,17 @@ class LifePostListSerializer(serializers.ModelSerializer):
         ]
 
     def get_images(self, obj):
-        """
-        返回完整 URL 数组
-        """
-        request = self.context.get('request')  # 获取 request
-        result = []
-        for img in obj.images.all():
-            if img.image:
-                try:
-                    url = img.image.url
-                    if request:
-                        url = request.build_absolute_uri(url)
-                    result.append(url)
-                except Exception:
-                    continue
-        return result
+        request = self.context.get('request')
+        urls = []
+        for img in obj.images.all().order_by("order"):
+            try:
+                url = img.image.url
+                if request:
+                    url = request.build_absolute_uri(url)
+                urls.append(url)
+            except Exception:
+                continue
+        return urls
 
     def get_comment_count(self, obj):
         return obj.comments.count()
@@ -63,11 +59,12 @@ class LifePostListSerializer(serializers.ModelSerializer):
                 url = avatar.url
                 request = self.context.get('request')
                 if request:
-                    url = request.build_absolute_uri(url)
+                    return request.build_absolute_uri(url)
                 return url
             except Exception:
                 return None
         return None
+
 
 
 class LifePostDetailSerializer(LifePostListSerializer):
