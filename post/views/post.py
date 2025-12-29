@@ -88,7 +88,14 @@ class StudyPostSearchView(APIView):
         keyword = request.query_params.get('q', '').strip()
 
         if not keyword:
-            return Response([])
+            return Response({
+                'code': 200,
+                'message': 'ok',
+                'data': {
+                    'list': [],
+                    'hasMore': False
+                }
+            })
 
         qs = Post.objects.filter(
             target='study'
@@ -97,5 +104,14 @@ class StudyPostSearchView(APIView):
             Q(content__icontains=keyword)
         ).order_by('-created_at')
 
-        serializer = LifePostListSerializer(qs, many=True)
-        return Response(serializer.data)
+        serializer = LifePostListSerializer(qs, many=True, context={'request': request})
+
+        return Response({
+            'code': 200,
+            'message': 'ok',
+            'data': {
+                'list': serializer.data,
+                'hasMore': False
+            }
+        })
+

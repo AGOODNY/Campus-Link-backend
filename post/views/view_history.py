@@ -9,7 +9,6 @@ class PostViewRecordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, post_id=None, pk=None):
-        # 兼容两种路由参数名
         post_id = post_id or pk
         post = get_object_or_404(Post, pk=post_id)
 

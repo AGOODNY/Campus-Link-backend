@@ -38,12 +38,13 @@ class IssueDetailSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     issue_pic = IssueImageSerializer(many=True, read_only=True)
     nodes = IssueNodeSerializer(many=True, read_only=True)
+    createTime = serializers.DateTimeField(source='created_at', format="%Y-%m-%d %H:%M:%S")
 
     class Meta:
         model = Issue
         fields = [
             "id","title","description","status",
-            "created_at","updated_at",
+            "createTime","updated_at",
             "nickname","avatar",
             "issue_pic","nodes",
         ]
