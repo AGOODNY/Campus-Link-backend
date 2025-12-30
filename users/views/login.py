@@ -8,37 +8,29 @@ from users.serializers import MeSerializer
 
 class LoginView(APIView):
     def post(self, request):
-        openid = request.data.get('openid')
-        role = request.data.get('role')
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-        if not openid:
-            return Response({'code': 1, 'message': 'openid is required'}, status=400)
+        if not username or not password:
+            return Response({"code": 1, "message": "Username and password required"}, status=400)
 
-        if role not in ['student', 'staff']:
-            return Response({'code': 1, 'message': 'role must be student or staff'}, status=400)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({"code": 1, "message": "Account does not exist"}, status=400)
 
-        user, created = User.objects.get_or_create(
-            openid=openid,
-            defaults={
-                'username': f'user_{openid[-6:]}',
-                'role': role
-            }
-        )
-
-        # 已存在用户，更新角色
-        if not created and user.role != role:
-            user.role = role
-            user.save()
+        if not user.check_password(password):
+            return Response({"code": 1, "message": "Password incorrect"}, status=400)
 
         token, _ = Token.objects.get_or_create(user=user)
-
         return Response({
-            'code': 0,
-            'message': 'success',
-            'data': {
-                'token': token.key,
-                'role': user.role,
-                'is_staff': user.is_staff
+            "code": 0,
+            "message": "success",
+            "data": {
+                "token": token.key,
+                "role": user.role,
+                "is_staff": user.is_staff
             }
         })
+
 

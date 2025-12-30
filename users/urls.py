@@ -5,9 +5,10 @@ from users.views.me import (
     MyViewHistoryView, MyPostListView
 )
 from post.views.view_history import PostViewRecordView, ViewHistoryListView
-
+from users.views.register import RegisterView
 
 urlpatterns = [
+    path('register/', RegisterView.as_view()),
     path('login/', LoginView.as_view()),
     path('me/', MeView.as_view()),
     path('me/posts/', MyPostListView.as_view()),

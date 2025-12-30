@@ -7,7 +7,7 @@ class User(AbstractUser):
         ('staff', 'Staff'),
     )
 
-    openid = models.CharField(max_length=64, unique=True)
+    openid = models.CharField(max_length=64, unique=False, null=True, blank=True)
     role = models.CharField(
         max_length=10,
         choices=ROLE_CHOICES,

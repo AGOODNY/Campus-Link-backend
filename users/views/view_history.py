@@ -27,6 +27,6 @@ class ViewHistoryListView(APIView):
         serializer = PostViewHistorySerializer(
             qs,
             many=True,
-            context={'request': request}  # ⚠️ 记得传 request
+            context={'request': request}
         )
         return Response(serializer.data)
